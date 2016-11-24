@@ -48,8 +48,9 @@ struct vertice {
 	lint	distancia;
 	Estado	estado;
 	vertice anterior;
-	lista	vizinhos_esq;
-	lista	vizinhos_dir;
+	vertice proximo;
+	lista	vizinhos_sai;
+	lista	vizinhos_ent;
 };
 
 typedef struct aresta* aresta;
@@ -84,7 +85,7 @@ void print_v(grafo g) {
 			v = conteudo(n);
 			printf("%u %s=%p\n", v->id, v->nome, v);
 			printf("\tV.:\n");
-			print_a(v, v->vizinhos_esq);
+			print_a(v, v->vizinhos_sai);
 	}
 	fflush(stdout);
 }
@@ -100,9 +101,9 @@ void print_vbylista(lista l) {
         		v->nome,\
 				v->estado == NaoVisitado ? "NaoVisitado" : "Visitado",\
 				v->distancia,\
-				v->vizinhos_esq->tamanho);
+				v->vizinhos_sai->tamanho);
 
-		print_attr(v, v->vizinhos_esq);
+		print_attr(v, v->vizinhos_sai);
 	}
 }
 
@@ -157,9 +158,9 @@ void print_vattr(grafo g) {
         		v->nome,\
 				v->estado == NaoVisitado ? "NaoVisitado" : "Visitado",\
 				v->distancia,\
-				v->vizinhos_esq->tamanho);
+				v->vizinhos_sai->tamanho);
 
-		print_attr(v, v->vizinhos_esq);
+		print_attr(v, v->vizinhos_sai);
 	}
 }
 
@@ -210,5 +211,17 @@ void print_mat(lista **m, grafo g) {
 				fprintf(stderr, " distancia = %ld\n", u->distancia);
 			}
 		}
+	}
+}
+
+void print_mat_dist(lint **d, uint size) {
+	uint i, j;
+
+	for( i=0; i < size; ++i ) {
+		fprintf(stderr, "%ld", d[i][0]);
+		for( j=0; j < size; ++j ) {
+			fprintf(stderr, " %ld", d[i][j]);
+		}
+		fprintf(stderr, "\n");
 	}
 }
