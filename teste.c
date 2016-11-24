@@ -45,7 +45,7 @@ void print_vattr(grafo);
 void print_vbylista(lista);
 void print_heap(heap*);
 void print_mat(lista**, grafo);
-void print_mat_dist(lint**, grafo);
+void print_mat_dist(lint**, uint);
 
 #else
 
@@ -80,47 +80,46 @@ int main(int argc, char* argv[]) {
 
     uint i, j;
 
-	fprintf(stderr, "%d\n", direcionado(g));
-	fprintf(stderr, "%ld\n", diametro(g));
-
-    u = busca_vertice("A", g->vertices);
-    v = busca_vertice("G", g->vertices);
-	fprintf(stderr, "%ld\n", distancia(u, v, g));
-
-    T = caminho_minimo(u, v, g);
-    print_vbylista(T);
-    destroi_lista(T, NULL);
-
-	T2 = (lista**)calloc(g->nvertices, sizeof(lista**));
-	lista **p = T2;
-	for( no n=primeiro_no(g->vertices); n; n=proximo_no(n) )
-		*p++ = (lista*)calloc(g->nvertices, sizeof(lista*));
-
-	caminhos_minimos(T2, g);
-	print_mat(T2, g);
-
-	p = T2;
-	for( i=0; i < g->nvertices; i++  ) {
-		for( j=0; j< g->nvertices; j++ ) {
-			destroi_lista(T2[i][j], destroi_vertice);
-		}
-		free(*p++);
-	}
-	free(T2);
-
 	lint **dist = (lint**)calloc(g->nvertices, sizeof(lint**));
 	for( i=0; i < g->nvertices; i++ ) {
 		dist[i] = (lint*)calloc(g->nvertices, sizeof(lint*));
 	}
 
-	distancias(dist, g);
-	print_mat_dist(dist, g);
+	distancias(dist, g, ' ');
+	print_mat_dist(dist, g->nvertices);
 
 	for( i=0; i < g->nvertices; i++ ) {
 		free(dist[i]);
 	}
 	free(dist);
 
+//	fprintf(stderr, "%d\n", direcionado(g));
+//	fprintf(stderr, "%ld\n", diametro(g));
+//
+//    u = busca_vertice("A", g->vertices);
+//    v = busca_vertice("G", g->vertices);
+//	fprintf(stderr, "%ld\n", distancia(u, v, g));
+//
+//    T = caminho_minimo(u, v, g);
+//    print_vbylista(T);
+//    destroi_lista(T, NULL);
+//
+//	T2 = (lista**)calloc(g->nvertices, sizeof(lista**));
+//	lista **p = T2;
+//	for( no n=primeiro_no(g->vertices); n; n=proximo_no(n) )
+//		*p++ = (lista*)calloc(g->nvertices, sizeof(lista*));
+//
+//	caminhos_minimos(T2, g);
+//	print_mat(T2, g);
+//
+//	p = T2;
+//	for( i=0; i < g->nvertices; i++  ) {
+//		for( j=0; j< g->nvertices; j++ ) {
+//			destroi_lista(T2[i][j], destroi_vertice);
+//		}
+//		free(*p++);
+//	}
+//	free(T2);
 
 
   printf("nome: %s\n", nome_grafo(g));
