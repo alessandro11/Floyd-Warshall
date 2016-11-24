@@ -11,7 +11,7 @@ ifndef DEBUG
 	CFLAGS += -O3
 else
 	DEFINES = -DDEBUG
-	CFLAGS += -g
+	CFLAGS += -g3
 	OBJS += debug.o
 endif
 
