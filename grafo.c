@@ -28,227 +28,6 @@
 
 const long int infinito = LONG_MAX;
 
-//-----------------------------------------------------------------------------
-// (apontador para) lista encadeada
-
-typedef struct lista *lista;
-
-//-----------------------------------------------------------------------------
-// (apontador para) nó da lista encadeada cujo conteúdo é um void *
-
-typedef struct no *no;
-
-//------------------------------------------------------------------------------
-// devolve o número de nós da lista l
-
-unsigned int tamanho_lista(lista l);
-
-//------------------------------------------------------------------------------
-// devolve o primeiro nó da lista l,
-//      ou NULL, se l é vazia
-
-no primeiro_no(lista l);
-
-//------------------------------------------------------------------------------
-// devolve o sucessor do nó n,
-//      ou NULL, se n for o último nó da lista
-
-no proximo_no(no n);
-
-//------------------------------------------------------------------------------
-// devolve o conteúdo do nó n
-//      ou NULL se n == NULL
-
-void *conteudo(no n);
-
-//------------------------------------------------------------------------------
-// insere um novo nó na lista l cujo conteúdo é p
-//
-// devolve o no recém-criado
-//      ou NULL em caso de falha
-no insere_lista(void *conteudo, lista l);
-
-//------------------------------------------------------------------------------
-// cria uma lista vazia e a devolve
-//
-// devolve NULL em caso de falha
-
-lista constroi_lista(void);
-
-//------------------------------------------------------------------------------
-// desaloca a lista l e todos os seus nós
-//
-// se destroi != NULL invoca
-//
-//     destroi(conteudo(n))
-//
-// para cada nó n da lista.
-//
-// devolve 1 em caso de sucesso,
-//      ou 0 em caso de falha
-
-int destroi_lista(lista l, int destroi(void *));
-
-//------------------------------------------------------------------------------
-// remove o no de endereço rno de l
-// se destroi != NULL, executa destroi(conteudo(rno))
-// devolve 1, em caso de sucesso
-//         0, se rno não for um no de l
-
-int remove_no(struct lista *l, struct no *rno, int destroi(void *));
-
-//------------------------------------------------------------------------------
-// (apontador para) estrutura de dados para representar um grafo
-//
-// o grafo pode ser
-// - direcionado ou não
-// - com pesos nas arestas/arcos ou não
-//
-// além dos vértices e arestas, o grafo tem um nome, que é uma "string"
-//
-// num grafo com pesos todas as arestas/arcos tem peso, que é um long int
-//
-// o peso default é 0
-
-typedef struct grafo *grafo;
-
-//------------------------------------------------------------------------------
-// devolve o nome do grafo g
-
-char *nome_grafo(grafo g);
-
-//------------------------------------------------------------------------------
-// devolve 1, se g é direcionado,
-//      ou 0, caso contrário
-
-int direcionado(grafo g);
-
-//------------------------------------------------------------------------------
-// devolve 1, se g tem pesos nas arestas/arcos,
-//      ou 0, caso contrário
-
-int ponderado(grafo g);
-
-//------------------------------------------------------------------------------
-// devolve o número de vértices do grafo g
-
-unsigned int numero_vertices(grafo g);
-
-//------------------------------------------------------------------------------
-// devolve o número de arestas/arcos do grafo g
-
-unsigned int numero_arestas(grafo g);
-
-//------------------------------------------------------------------------------
-// (apontador para) estrutura de dados que representa um vértice do grafo
-//
-// cada vértice tem um nome que é uma "string"
-
-typedef struct vertice *vertice;
-
-//------------------------------------------------------------------------------
-// devolve o nome do vertice v
-
-char *nome_vertice(vertice v);
-
-//------------------------------------------------------------------------------
-// devolve o vertice de nome s no grafo g,
-//      ou NULL caso não exista em g um vertice de nome s
-
-vertice vertice_nome(char *s, grafo g);
-
-//------------------------------------------------------------------------------
-// lê um grafo no formato dot de input, usando as rotinas de libcgraph
-//
-// desconsidera todos os atributos do grafo lido exceto o atributo
-// "peso" quando ocorrer; neste caso o valor do atributo é o peso da
-// aresta/arco que é um long int
-//
-// num grafo com pesos todas as arestas/arcos tem peso
-//
-// o peso default é 0
-//
-// todas as estruturas de dados alocadas pela libcgraph são
-// desalocadas ao final da execução
-//
-// devolve o grafo lido
-//      ou NULL em caso de erro
-
-grafo le_grafo(FILE *input);
-
-//------------------------------------------------------------------------------
-// desaloca toda a memória usada em *g
-//
-// devolve 1 em caso de sucesso,
-//      ou 0 caso contrário
-
-int destroi_grafo(grafo g);
-
-//------------------------------------------------------------------------------
-// escreve o grafo g em output usando o formato dot.
-//
-// o peso das arestas/arcos (quando houver) é escrito como o atributo
-// de nome "peso"
-//
-// devolve o grafo escrito
-//      ou NULL em caso de erro
-
-grafo escreve_grafo(FILE *output, grafo g);
-
-//------------------------------------------------------------------------------
-// devolve o grau de v no grafo g, se não é direcionado ou se direcao == 0,
-//      ou o grau de entrada de v no grafo g, se direcao == -1,
-//      ou o grau de saída de v no grafo g, se direcao == +1
-
-unsigned int grau(vertice v, int direcao, grafo g);
-
-//------------------------------------------------------------------------------
-// devolve uma lista de vértices de g representando o caminho mínimo
-// de u a v em g
-//
-// a lista é vazia se u e v estão em componentes diferentes de g
-
-lista caminho_minimo(vertice u, vertice v, grafo g);
-
-//------------------------------------------------------------------------------
-// devolve a distância de u a v em g
-
-long int distancia(vertice u, vertice v, grafo g);
-
-//------------------------------------------------------------------------------
-// devolve um número entre 0 e numero_vertices(g)
-//
-// este número é único e distinto para cada vértice de g e deve servir
-// para indexar vetores e matrizes a partir dos vértices de g
-
-unsigned int indice(vertice v, grafo g);
-
-//------------------------------------------------------------------------------
-// preenche a matriz d com as distâncias entre os vértices de g de
-// maneira que d[indice(u,g)][indice(v,g)] tenha o valor da distância
-// entre os vértices u e v em g
-//
-// devolve d
-
-long int **distancias(long int **d, grafo g);
-
-//------------------------------------------------------------------------------
-// preenche a matriz c com caminhos mínimos entre os vértices de g de
-// maneira que c[indice(u,g)][indice(v,g)] tenha um caminho mínimo
-// entre os vértices u e v em g
-//
-// devolve d
-
-lista **caminhos_minimos(lista **c, grafo g);
-
-//------------------------------------------------------------------------------
-// devolve o diâmetro de g
-
-long int diametro(grafo g);
-
-//______________________________________________________________________________
-
-
 /***
  * Meus includes.
  ******************************************************************************/
@@ -275,7 +54,7 @@ void print_vattr(grafo);
 void print_vbylista(lista);
 void print_heap(heap*);
 void print_mat(lista**, grafo);
-void print_mat_dist(lint**, grafo);
+void print_mat_dist(lint**, uint);
 
 #else
 
@@ -285,7 +64,7 @@ void print_mat_dist(lint**, grafo);
 #define print_vbylista(lista)		(void)0
 #define print_heap(heap)			(void)0
 #define print_mat(lista, grafo)		(void)0
-#define print_mat_dist(dist_m, grafo)(void)0
+#define print_mat_dist(d, s)		(void)0
 
 #endif /* DEBUG */
 
@@ -325,6 +104,7 @@ struct vertice {
 	lint	distancia;
 	Estado	estado;
 	vertice anterior;
+	vertice proximo;
 	lista	vizinhos_sai;
 	lista	vizinhos_ent;
 };
@@ -579,6 +359,11 @@ int remove_no(struct lista *l, struct no *rno, int destroi(void *)) {
  * Meu código começa aqui.
  *******************************************************************************
  */
+
+typedef struct __vertices {
+	vertice origem, destino;
+}vertices;
+
 /*
  * Protótipos
  */
@@ -590,6 +375,7 @@ vertice alloc_vertice(const char*, bool);
 aresta 	alloc_aresta(void);
 aresta 	dup_aresta(aresta);
 char* 	str_dup(const char*);
+vertices busca_vertices_byId(uint, uint, lista);
 vertice busca_vertice(const char*, lista);
 void 	dijkstra(vertice, grafo);
 
@@ -694,9 +480,23 @@ vertice busca_vertice(const char* nome, lista l) {
 	return NULL;
 }
 
-typedef struct __vertices {
-	vertice origem, destino;
-}vertices;
+vertices busca_vertices_byId(uint id1, uint id2, lista l) {
+    no n;
+    vertice v;
+    vertices vs = {NULL};
+
+    for( n=primeiro_no(l); n && !vs.origem && !vs.destino; n=proximo_no(n) ) {
+        v = (vertice)conteudo(n);
+        if( v->id == id1 )
+            vs.origem = v;
+        else if( v->id == id2 )
+            vs.destino = v;
+    }
+
+    return vs;
+}
+
+
 vertices busca_vertices(const char* nome_orig, const char* nome_dest, lista l) {
 	no n;
 	vertice v;
@@ -992,6 +792,49 @@ void dijkstra(vertice u, grafo g) {
 	free(h);
 }
 
+void floydwarshallpath(grafo g) {
+
+}
+
+lint w(vertice u, vertice v) {
+	no n;
+	aresta a;
+
+	for( n=primeiro_no(u->vizinhos_sai); n; n=proximo_no(n) ) {
+		a = conteudo(n);
+		if( a->destino == v )
+			return a->peso;
+	}
+
+	return infinito;
+}
+void floydwarshalldist(long int **d, grafo g) {
+    uint k, i, j;
+    vertices vs;
+    lint dist;
+
+    for( i=0; i < g->nvertices; ++i ) {
+        for( j=0; j < g->nvertices; ++j ) {
+            if( i == j ) d[i][j] = 0;
+            else {
+            	vs = busca_vertices_byId(i, j, g->vertices);
+            	d[i][j] = w(vs.origem, vs.destino);
+            }
+        }
+    }
+
+    for( k=1; k <= g->nvertices; ++k ) {
+    	for( i=1; i <= g->nvertices; ++i ) {
+    		for( j=1; j <= g->nvertices; ++j ) {
+    			dist = d[i][k] + d[k][j];
+    			if( d[i][j] > dist )
+    				d[i][j] = dist;
+    		}
+    	}
+    }
+
+}
+
 //------------------------------------------------------------------------------
 // devolve uma lista de vértices de g representando o caminho mínimo
 // de u a v em g
@@ -1021,30 +864,39 @@ lista caminho_minimo(vertice u, vertice v, grafo g) {
 // maneira que c[indice(u,g)][indice(v,g)] tenha um caminho mínimo
 // entre os vértices u e v em g
 //
+// usa o algoritmo de Dijkstra,       se algoritmo == 'd'
+//  ou o algoritmo de Floyd-Warshall, caso contrário.
+//
+// quando g é ponderado, os pesos são todos não negativos
+//
 // devolve c
 
-lista **caminhos_minimos(lista **c, grafo g) {
+lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 	no n, n2;
 	vertice u, v;
 
-	for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
-		u = conteudo(n);
-		dijkstra(u, g);
-		for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
-			v = conteudo(n2);
-			if( u == v ) {
-				c[u->id][v->id] = constroi_lista();
-			}else {
-				c[u->id][v->id] = constroi_lista();
+	if( algoritmo == 'd' ) {
+		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
+			u = conteudo(n);
+			dijkstra(u, g);
+			for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
+				v = conteudo(n2);
+				if( u == v ) {
+					c[u->id][v->id] = constroi_lista();
+				}else {
+					c[u->id][v->id] = constroi_lista();
 
-				insere_lista(dup_vertice(v), c[u->id][v->id]);
-				vertice p = v->anterior;
-				while( p ) {
-					insere_lista(dup_vertice(p), c[u->id][v->id]);
-					p = p->anterior;
+					insere_lista(dup_vertice(v), c[u->id][v->id]);
+					vertice p = v->anterior;
+					while( p ) {
+						insere_lista(dup_vertice(p), c[u->id][v->id]);
+						p = p->anterior;
+					}
 				}
 			}
 		}
+	}else {
+		//
 	}
 
 	return c;
@@ -1057,22 +909,29 @@ lista **caminhos_minimos(lista **c, grafo g) {
 //
 // quando g é ponderado, os pesos são todos não negativos
 //
+// usa o algoritmo de Dijkstra,       se algoritmo == 'd'
+//  ou o algoritmo de Floyd-Warshall, caso contrário.
+//
 // devolve d
 
-long int **distancias(long int **d, grafo g) {
+long int **distancias(long int **d, grafo g, char algoritmo) {
 	no n, n2;
 	vertice u, v;
 
-	for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
-		u = conteudo(n);
-		dijkstra(u, g);
-		for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
-			v = conteudo(n2);
-			if( u == v )
-				d[u->id][v->id] = 0;
-			else
-				d[u->id][v->id] = v->distancia;
+	if( algoritmo == 'd' ) {
+		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
+			u = conteudo(n);
+			dijkstra(u, g);
+			for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
+				v = conteudo(n2);
+				if( u == v )
+					d[u->id][v->id] = 0;
+				else
+					d[u->id][v->id] = v->distancia;
+			}
 		}
+	}else {
+		floydwarshalldist(d, g);
 	}
 
 	return d;
