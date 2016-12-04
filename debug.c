@@ -219,7 +219,7 @@ void print_mat_dist(lint **d, uint size) {
 
 	for( i=0; i < size; ++i ) {
 		fprintf(stderr, "%ld", d[i][0]);
-		for( j=0; j < size; ++j ) {
+		for( j=1; j < size; ++j ) {
 			fprintf(stderr, " %ld", d[i][j]);
 		}
 		fprintf(stderr, "\n");
