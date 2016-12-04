@@ -485,7 +485,7 @@ vertices busca_vertices_byId(uint id1, uint id2, lista l) {
     vertice v;
     vertices vs = {NULL};
 
-    for( n=primeiro_no(l); n && !vs.origem && !vs.destino; n=proximo_no(n) ) {
+    for( n=primeiro_no(l); n && (!vs.origem || !vs.destino); n=proximo_no(n) ) {
         v = (vertice)conteudo(n);
         if( v->id == id1 )
             vs.origem = v;
@@ -808,6 +808,7 @@ lint w(vertice u, vertice v) {
 
 	return infinito;
 }
+
 void floydwarshalldist(long int **d, grafo g) {
     uint k, i, j;
     vertices vs;
@@ -823,16 +824,16 @@ void floydwarshalldist(long int **d, grafo g) {
         }
     }
 
-    for( k=1; k <= g->nvertices; ++k ) {
-    	for( i=1; i <= g->nvertices; ++i ) {
-    		for( j=1; j <= g->nvertices; ++j ) {
+    print_mat_dist(d, g->nvertices);
+    for( k=0; k < g->nvertices; ++k ) {
+    	for( i=0; i < g->nvertices; ++i ) {
+    		for( j=0; j < g->nvertices; ++j ) {
     			dist = d[i][k] + d[k][j];
-    			if( d[i][j] > dist )
+    			if( dist > 0 && d[i][j] > dist )
     				d[i][j] = dist;
     		}
     	}
     }
-
 }
 
 //------------------------------------------------------------------------------
