@@ -792,10 +792,6 @@ void dijkstra(vertice u, grafo g) {
 	free(h);
 }
 
-void floydwarshallpath(grafo g) {
-
-}
-
 lint w(vertice u, vertice v) {
 	no n;
 	aresta a;
@@ -809,15 +805,16 @@ lint w(vertice u, vertice v) {
 	return infinito;
 }
 
-void floydwarshalldist(long int **d, grafo g) {
+void floydwarshall(long int **d, vertice **proxv, grafo g) {
     uint k, i, j;
     vertices vs;
     lint dist;
 
     for( i=0; i < g->nvertices; ++i ) {
         for( j=0; j < g->nvertices; ++j ) {
-            if( i == j ) d[i][j] = 0;
-            else {
+            if( i == j ) {
+            	d[i][j] = 0;
+            }else {
             	vs = busca_vertices_byId(i, j, g->vertices);
             	d[i][j] = w(vs.origem, vs.destino);
             }
@@ -829,8 +826,11 @@ void floydwarshalldist(long int **d, grafo g) {
     	for( i=0; i < g->nvertices; ++i ) {
     		for( j=0; j < g->nvertices; ++j ) {
     			dist = d[i][k] + d[k][j];
-    			if( dist > 0 && d[i][j] > dist )
+    			if( dist > 0 && d[i][j] > dist ) {
     				d[i][j] = dist;
+    				if( proxv )
+    					proxv[i][j] = proxv[i][k];
+    			}
     		}
     	}
     }
@@ -897,7 +897,32 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 			}
 		}
 	}else {
-		//
+		lint **d = (lint**)calloc(g->nvertices, sizeof(lint**));
+		vertice **m = (vertice**)calloc(g->nvertices, sizeof(vertice**));
+		for( int i=0; i < g->nvertices; ++i ) {
+			d[i] = (lint*)calloc(g->nvertices, sizeof(lint));
+			m[i] = (vertice*)calloc(g->nvertices, sizeof(vertice*));
+		}
+
+		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
+			u = conteudo(n);
+			floydwarshall(d, m, g);
+			for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
+				v = conteudo(n2);
+				if( u == v ) {
+					c[u->id][v->id] = 0;
+				}else {
+					c[u->id][v->id] = constroi_lista();
+
+					insere_lista(dup_vertice(v), c[u->id][v->id]);
+					vertice p = v->proximo;
+					while( p ) {
+						insere_lista(dup_vertice(p), c[u->id][v->id]);
+						p = p->proximo;
+					}
+				}
+			}
+		}
 	}
 
 	return c;
@@ -932,7 +957,7 @@ long int **distancias(long int **d, grafo g, char algoritmo) {
 			}
 		}
 	}else {
-		floydwarshalldist(d, g);
+		floydwarshall(d, NULL, g);
 	}
 
 	return d;
