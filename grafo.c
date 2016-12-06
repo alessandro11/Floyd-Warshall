@@ -450,8 +450,8 @@ struct no {
 struct lista {
 
   unsigned int tamanho;
-  int padding; // só pra evitar warning
   no primeiro;
+  no sentinela;
 };
 
 //---------------------------------------------------------------------------
@@ -462,6 +462,7 @@ unsigned int tamanho_lista(lista l) { return l->tamanho; }
 // devolve o primeiro nó da lista l,
 //      ou NULL, se l é vazia
 no primeiro_no(lista l) { return l->primeiro; }
+no ultimo_no(lista l) { return l->sentinela->anterior; }
 
 //---------------------------------------------------------------------------
 // devolve o conteúdo do nó n
@@ -472,6 +473,7 @@ void *conteudo(no n) { return n->conteudo; }
 // devolve o sucessor do nó n,
 //      ou NULL, se n for o último nó da lista
 no proximo_no(no n) { return n->proximo; }
+no anterior_no(no n) { return n->anterior; }
 
 //---------------------------------------------------------------------------
 // cria uma lista vazia e a devolve
@@ -484,7 +486,8 @@ lista constroi_lista(void) {
   if ( ! l )
     return NULL;
 
-  l->primeiro = NULL;
+  l->sentinela = (no)calloc(1, sizeof(struct no));
+  l->primeiro = l->sentinela;
   l->tamanho = 0;
 
   return l;
@@ -534,7 +537,9 @@ no insere_lista(void *conteudo, lista l) {
     return NULL;
 
   novo->conteudo = conteudo;
+  novo->anterior = l->sentinela;
   novo->proximo = primeiro_no(l);
+  novo->proximo->anterior = novo;
   ++l->tamanho;
 
   return l->primeiro = novo;
@@ -663,6 +668,25 @@ char* str_dup(const char* str) {
 grafo le_grafo(FILE *input) {
     Agraph_t*	Ag_g;
     grafo       g;
+
+    lista l;
+    l = constroi_lista();
+    int a=1;
+    insere_lista((void*)a++, l);
+    insere_lista((void*)a++, l);
+    insere_lista((void*)a, l);
+//    destroi_lista(l, NULL);
+
+    no n;
+    void *c;
+    for( n=primeiro_no(l); n->conteudo; n=proximo_no(n) ) {
+    	c=conteudo(n);
+    	fprintf(stderr, "0x%x\n", (uint)(unsigned long)c);
+    }
+    for( n=ultimo_no(l); n->conteudo; n=anterior_no(n) ) {
+    	c=conteudo(n);
+    	fprintf(stderr, "0x%x\n", (uint)(unsigned long)c);
+    }
 
     g = (grafo)alloc_grafo();
     Ag_g = agread(input, NULL);
