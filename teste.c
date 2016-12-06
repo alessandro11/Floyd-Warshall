@@ -111,6 +111,8 @@ int main(int argc, char* argv[]) {
 	for( no n=primeiro_no(g->vertices); n; n=proximo_no(n) )
 		*p++ = (lista*)calloc(g->nvertices, sizeof(lista*));
 
+	caminhos_minimos(T2, g, 'd');
+	print_mat(T2, g);
 	caminhos_minimos(T2, g, ' ');
 	print_mat(T2, g);
 
