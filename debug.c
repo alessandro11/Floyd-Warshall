@@ -214,6 +214,23 @@ void print_mat(lista **m, grafo g) {
 	}
 }
 
+void print_mat_v(vertice **m, grafo g) {
+	unsigned int i, j;
+
+	for( i=0; i < g->nvertices; i++ ) {
+		for( j=0; j < g->nvertices; j++ ) {
+			if( !m[i][j] ) {
+				fprintf(stderr, "(%u,%u) ", i, j);
+				continue;
+			}
+			fprintf(stderr, "(%u,%u n=%s id=%u) ", i, j,\
+					m[i][j]->nome, m[i][j]->id);
+
+		}
+		fprintf(stderr, "\n");
+	}
+}
+
 void print_mat_dist(lint **d, uint size) {
 	uint i, j;
 
