@@ -906,7 +906,7 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 		vertice **m = (vertice**)calloc(g->nvertices, sizeof(vertice**));
 		lint i, j, iu;
 
-		for( int i=0; i < g->nvertices; ++i ) {
+		for( i=0; i < g->nvertices; ++i ) {
 			d[i] = (lint*)calloc(g->nvertices, sizeof(lint*));
 			m[i] = (vertice*)calloc(g->nvertices, sizeof(vertice*));
 		}
@@ -918,8 +918,6 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 			for( j=0; j < g->nvertices; ++j ) {
 				c[i][j] = constroi_lista();
 				if( i != j ) {
-					c[i][j] = constroi_lista();
-
 					// há o caminho de u, v (i, j)
 					if( m[i][j] ) {
 						vs = busca_vertices_byId(i, j, g->vertices);
@@ -934,6 +932,11 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 				}
 			}
 		}
+
+		for( i=0; i < g->nvertices; ++i ) {
+			free(d[i]); free(m[i]);
+		}
+		free(d); free(m);
 	}
 
 	return c;
