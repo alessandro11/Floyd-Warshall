@@ -55,6 +55,7 @@ void print_vbylista(lista);
 void print_heap(heap*);
 void print_mat(lista**, grafo);
 void print_mat_dist(lint**, uint);
+void print_mat_v(vertice **, grafo);
 
 #else
 
@@ -65,6 +66,7 @@ void print_mat_dist(lint**, uint);
 #define print_heap(heap)			(void)0
 #define print_mat(lista, grafo)		(void)0
 #define print_mat_dist(d, s)		(void)0
+#define print_mat_dist(v, g)		(void)0
 
 #endif /* DEBUG */
 
@@ -492,6 +494,7 @@ vertices busca_vertices_byId(uint id1, uint id2, lista l) {
         else if( v->id == id2 )
             vs.destino = v;
     }
+    if( id1 == id2 ) vs.destino = vs.origem;
 
     return vs;
 }
@@ -817,11 +820,12 @@ void floydwarshall(long int **d, vertice **proxv, grafo g) {
             }else {
             	vs = busca_vertices_byId(i, j, g->vertices);
             	d[i][j] = w(vs.origem, vs.destino);
+            	if( proxv ) proxv[i][j] = vs.destino;
             }
         }
     }
 
-    print_mat_dist(d, g->nvertices);
+//    print_mat_dist(d, g->nvertices);
     for( k=0; k < g->nvertices; ++k ) {
     	for( i=0; i < g->nvertices; ++i ) {
     		for( j=0; j < g->nvertices; ++j ) {
@@ -875,6 +879,7 @@ lista caminho_minimo(vertice u, vertice v, grafo g) {
 lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 	no n, n2;
 	vertice u, v;
+	vertices vs;
 
 	if( algoritmo == 'd' ) {
 		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
@@ -899,26 +904,32 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 	}else {
 		lint **d = (lint**)calloc(g->nvertices, sizeof(lint**));
 		vertice **m = (vertice**)calloc(g->nvertices, sizeof(vertice**));
+		lint i, j, iu;
+
 		for( int i=0; i < g->nvertices; ++i ) {
-			d[i] = (lint*)calloc(g->nvertices, sizeof(lint));
+			d[i] = (lint*)calloc(g->nvertices, sizeof(lint*));
 			m[i] = (vertice*)calloc(g->nvertices, sizeof(vertice*));
 		}
 
-		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
-			u = conteudo(n);
-			floydwarshall(d, m, g);
-			for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
-				v = conteudo(n2);
-				if( u == v ) {
-					c[u->id][v->id] = 0;
-				}else {
-					c[u->id][v->id] = constroi_lista();
+		floydwarshall(d, m, g);
+		print_mat_dist(d, g->nvertices);
+		print_mat_v(m, g);
+		for( i=0; i < g->nvertices; ++i ) {
+			for( j=0; j < g->nvertices; ++j ) {
+				c[i][j] = constroi_lista();
+				if( i != j ) {
+					c[i][j] = constroi_lista();
 
-					insere_lista(dup_vertice(v), c[u->id][v->id]);
-					vertice p = v->proximo;
-					while( p ) {
-						insere_lista(dup_vertice(p), c[u->id][v->id]);
-						p = p->proximo;
+					// há o caminho de u, v (i, j)
+					if( m[i][j] ) {
+						vs = busca_vertices_byId(i, j, g->vertices);
+						iu = i;
+						insere_lista(dup_vertice(vs.origem), c[i][j]);
+						while( vs.origem != vs.destino ) {
+							iu = m[iu][vs.destino->id]->id;	// proximo
+							vs = busca_vertices_byId(iu, vs.destino->id, g->vertices);
+							insere_lista(dup_vertice(vs.origem), c[i][j]);
+						}
 					}
 				}
 			}
