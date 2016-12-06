@@ -1,0 +1,17 @@
+strict digraph "d" {
+	splines=true;
+	sep="+25,25";
+	overlap=scalexy;
+	nodesep=0.8;
+	node [fontsize=11];
+
+	D;
+	C;
+	B;
+	A;
+	A -> C ["peso"=2, label=2]
+	B -> A ["peso"=4, label=4]
+	B -> C ["peso"=3, label=3]
+	C -> D ["peso"=2, label=2]
+	D -> B ["peso"=1, label=1]
+}
