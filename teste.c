@@ -12,12 +12,17 @@ typedef enum __Estado {
 	Visitado
 }Estado;
 
+struct no {
+  void*	conteudo;
+  no	anterior;
+  no 	proximo;
+};
+
 typedef struct lista *lista;
 struct lista {
-
   unsigned int tamanho;
-  int padding; // só pra evitar warning
   no primeiro;
+  no sentinela;
 };
 
 typedef struct grafo *grafo;
@@ -33,7 +38,6 @@ struct grafo {
 
 
 int destroi_vertice(void *v);
-vertice busca_vertice(const char*, lista);
 
 #ifdef DEBUG
 
@@ -45,6 +49,7 @@ void print_vattr(grafo);
 void print_vbylista(lista);
 void print_heap(heap*);
 void print_mat(lista**, grafo);
+void print_mat_rev(lista**, grafo);
 void print_mat_dist(lint**, uint);
 
 #else
@@ -56,7 +61,7 @@ void print_mat_dist(lint**, uint);
 #define print_heap(heap)			(void)0
 #define print_mat(lista, grafo)		(void)0
 #define print_mat_dist(dist_m, grafo)(void)0
-
+#define print_mat_rev(lista, grsfo)	(void)0
 #endif /* DEBUG */
 
 
@@ -75,8 +80,8 @@ int main(int argc, char* argv[]) {
 	//binary heap
 	//http://www.cs.princeton.edu/~wayne/cs423/lectures/heaps-4up.pdf
 
-    vertice u, v;
-    lista T, **T2;
+//    vertice u, v;
+    lista **T2;
 
     uint i, j;
 //
@@ -108,13 +113,21 @@ int main(int argc, char* argv[]) {
 //
 	T2 = (lista**)calloc(g->nvertices, sizeof(lista**));
 	lista **p = T2;
-	for( no n=primeiro_no(g->vertices); n; n=proximo_no(n) )
+	for( no n=primeiro_no(g->vertices); n->conteudo; n=proximo_no(n) )
 		*p++ = (lista*)calloc(g->nvertices, sizeof(lista*));
 
-	caminhos_minimos(T2, g, 'd');
-	print_mat(T2, g);
-	caminhos_minimos(T2, g, ' ');
-	print_mat(T2, g);
+	if( *argv[2] == 'd' ) {
+		caminhos_minimos(T2, g, 'd');
+		print_mat(T2, g);
+		for( int i=0; i < g->nvertices; ++i ) {
+			for( int j=0; j < g->nvertices; ++j ) {
+				destroi_lista(T2[i][j], destroi_vertice);
+			}
+		}
+	}else {
+		caminhos_minimos(T2, g, ' ');
+		print_mat_rev(T2, g);
+	}
 
 	p = T2;
 	for( i=0; i < g->nvertices; i++  ) {
@@ -126,13 +139,13 @@ int main(int argc, char* argv[]) {
 	free(T2);
 
 
-  printf("nome: %s\n", nome_grafo(g));
-  printf("%sdirecionado\n", direcionado(g) ? "" : "não ");
-  printf("%sponderado\n", ponderado(g) ? "" : "não ");
-  printf("%d vértices\n", numero_vertices(g));
-  printf("%d arestas\n", numero_arestas(g));
-
-  escreve_grafo(stdout, g);
+//  printf("nome: %s\n", nome_grafo(g));
+//  printf("%sdirecionado\n", direcionado(g) ? "" : "não ");
+//  printf("%sponderado\n", ponderado(g) ? "" : "não ");
+//  printf("%d vértices\n", numero_vertices(g));
+//  printf("%d arestas\n", numero_arestas(g));
+//
+//  escreve_grafo(stdout, g);
 
   return ! destroi_grafo(g);
 }

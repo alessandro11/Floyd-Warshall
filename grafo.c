@@ -363,45 +363,6 @@ unsigned int numero_vertices(grafo g) { return g->nvertices; }
 unsigned int numero_arestas(grafo g) { return g->narestas; }
 
 //------------------------------------------------------------------------------
-// escreve o grafo g em output usando o formato dot.
-//
-// o peso das arestas/arcos (quando houver) é escrito como o atributo
-// de nome "peso"
-//
-// devolve o grafo escrito
-//      ou NULL em caso de erro
-grafo escreve_grafo(FILE *output, grafo g) {
-    vertice v;
-    aresta  a;
-    char    ch;
-    no      n, na;
-
-    if( !g ) return NULL;
-    fprintf( output, "strict %sgraph \"%s\" {\n\n", \
-            direcionado(g) ? "di" : "", g->nome );
-
-    for( n=primeiro_no(g->vertices); n; n=proximo_no(n) )
-        fprintf(output, "    \"%s\"\n", ((vertice)conteudo(n))->nome);
-    fprintf( output, "\n" );
-
-    ch = direcionado(g) ? '>' : '-';
-    for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
-        v = (vertice)conteudo(n);
-        for( na=primeiro_no(v->vizinhos_sai); na; na=proximo_no(na) ) {
-            a = (aresta)conteudo(na);
-            fprintf(output, "    \"%s\" -%c \"%s\"", v->nome, ch, a->destino->nome);
-
-            if ( a->ponderado )
-                fprintf( output, " [peso=%ld]", a->peso );
-            fprintf( output, "\n" );
-        }
-    }
-    fprintf( output, "}\n" );
-
-    return g;
-}
-
-//------------------------------------------------------------------------------
 // desaloca toda a memória usada em *g
 //
 // devolve 1 em caso de sucesso,
@@ -439,7 +400,6 @@ int destroi_aresta(void *a) {
 //
 // nó de lista encadeada cujo conteúdo é um void *
 struct no {
-
   void*	conteudo;
   no	anterior;
   no 	proximo;
@@ -448,11 +408,49 @@ struct no {
 //---------------------------------------------------------------------------
 // lista encadeada
 struct lista {
-
   unsigned int tamanho;
   no primeiro;
   no sentinela;
 };
+
+//------------------------------------------------------------------------------
+// escreve o grafo g em output usando o formato dot.
+//
+// o peso das arestas/arcos (quando houver) é escrito como o atributo
+// de nome "peso"
+//
+// devolve o grafo escrito
+//      ou NULL em caso de erro
+grafo escreve_grafo(FILE *output, grafo g) {
+    vertice v;
+    aresta  a;
+    char    ch;
+    no      n, na;
+
+    if( !g ) return NULL;
+    fprintf( output, "strict %sgraph \"%s\" {\n\n", \
+            direcionado(g) ? "di" : "", g->nome );
+
+    for( n=primeiro_no(g->vertices); n->conteudo; n=proximo_no(n) )
+        fprintf(output, "    \"%s\"\n", ((vertice)conteudo(n))->nome);
+    fprintf( output, "\n" );
+
+    ch = direcionado(g) ? '>' : '-';
+    for( n=primeiro_no(g->vertices); n->conteudo; n=proximo_no(n) ) {
+        v = (vertice)conteudo(n);
+        for( na=primeiro_no(v->vizinhos_sai); na->conteudo; na=proximo_no(na) ) {
+            a = (aresta)conteudo(na);
+            fprintf(output, "    \"%s\" -%c \"%s\"", v->nome, ch, a->destino->nome);
+
+            if ( a->ponderado )
+                fprintf( output, " [peso=%ld]", a->peso );
+            fprintf( output, "\n" );
+        }
+    }
+    fprintf( output, "}\n" );
+
+    return g;
+}
 
 //---------------------------------------------------------------------------
 // devolve o número de nós da lista l
@@ -513,7 +511,7 @@ int destroi_lista(lista l, int destroi(void *)) {
 
     l->primeiro = proximo_no(p);
 
-    if ( destroi )
+    if ( destroi && p->conteudo )
       ok &= destroi(conteudo(p));
 
     free(p);
@@ -669,25 +667,6 @@ grafo le_grafo(FILE *input) {
     Agraph_t*	Ag_g;
     grafo       g;
 
-    lista l;
-    l = constroi_lista();
-    int a=1;
-    insere_lista((void*)a++, l);
-    insere_lista((void*)a++, l);
-    insere_lista((void*)a, l);
-//    destroi_lista(l, NULL);
-
-    no n;
-    void *c;
-    for( n=primeiro_no(l); n->conteudo; n=proximo_no(n) ) {
-    	c=conteudo(n);
-    	fprintf(stderr, "0x%x\n", (uint)(unsigned long)c);
-    }
-    for( n=ultimo_no(l); n->conteudo; n=anterior_no(n) ) {
-    	c=conteudo(n);
-    	fprintf(stderr, "0x%x\n", (uint)(unsigned long)c);
-    }
-
     g = (grafo)alloc_grafo();
     Ag_g = agread(input, NULL);
     if ( !Ag_g ) {
@@ -711,7 +690,7 @@ vertice busca_vertice(const char* nome, lista l) {
 	no n;
 	vertice v;
 
-	for( n=primeiro_no(l); n; n=proximo_no(n) ) {
+	for( n=primeiro_no(l); n->conteudo; n=proximo_no(n) ) {
 		v = (vertice)conteudo(n);
 		if( strcmp(nome, v->nome) == 0 )
 			return v;
@@ -725,7 +704,7 @@ vertices busca_vertices_byId(uint id1, uint id2, lista l) {
     vertice v;
     vertices vs = {NULL};
 
-    for( n=primeiro_no(l); n && (!vs.origem || !vs.destino); n=proximo_no(n) ) {
+    for( n=primeiro_no(l); n->conteudo && (!vs.origem || !vs.destino); n=proximo_no(n) ) {
         v = (vertice)conteudo(n);
         if( v->id == id1 )
             vs.origem = v;
@@ -743,7 +722,7 @@ vertices busca_vertices(const char* nome_orig, const char* nome_dest, lista l) {
 	vertice v;
 	vertices vs = {NULL};
 
-	for( n=primeiro_no(l); n && (vs.origem == NULL || vs.destino == NULL); n=proximo_no(n) ) {
+	for( n=primeiro_no(l); n->conteudo && (vs.origem == NULL || vs.destino == NULL); n=proximo_no(n) ) {
 		v = (vertice)conteudo(n);
 		if( strcmp(nome_orig, v->nome) == 0 )
 			vs.origem = v;
@@ -852,21 +831,7 @@ void constroi_grafo(Agraph_t* ag, grafo g) {
 	}
 
 	// funciona somente em modo de DEBUG, link com debug.c
-	print_v(g);
-}
-
-no vertice_min_dist(lista l) {
-	no n, min;
-	vertice u;
-
-	min = primeiro_no(l);
-	u = conteudo(min);
-	for( n=proximo_no(min); n; n=proximo_no(n) ) {
-		if( ((vertice)conteudo(n))->distancia < u->distancia )
-			u = conteudo(n);
-	}
-
-	return min;
+//	print_v(g);
 }
 
 #define impar(n)		( ((n) % 2) != 0 )
@@ -984,7 +949,7 @@ heap* constroi_heap(grafo g) {
 	n = primeiro_no(g->vertices);
 	h[1] = conteudo(n);
 	heap_size = 2;
-	for( n=proximo_no(n); n; n=proximo_no(n) ) {
+	for( n=proximo_no(n); n->conteudo; n=proximo_no(n) ) {
 		u = conteudo(n);
 		h[heap_size] = u;
 		decrementa_chave(h, heap_size++);
@@ -1001,7 +966,7 @@ void dijkstra(vertice u, grafo g) {
 	lint dist;
 	heap* h;
 
-	for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
+	for( n=primeiro_no(g->vertices); n->conteudo; n=proximo_no(n) ) {
 		ucorr = conteudo(n);
 		ucorr->estado = NaoVisitado;
 		ucorr->distancia = infinito;
@@ -1017,7 +982,7 @@ void dijkstra(vertice u, grafo g) {
 		ucorr = remove_min(h);
 		ucorr->estado = Visitado;
 
-		for( n=primeiro_no(ucorr->vizinhos_sai); n; n=proximo_no(n) ) {
+		for( n=primeiro_no(ucorr->vizinhos_sai); n->conteudo; n=proximo_no(n) ) {
 			a = conteudo(n);
 			if( a->destino->estado == NaoVisitado ) {
 				dist = a->origem->distancia + a->peso;
@@ -1037,7 +1002,7 @@ lint w(vertice u, vertice v) {
 	no n;
 	aresta a;
 
-	for( n=primeiro_no(u->vizinhos_sai); n; n=proximo_no(n) ) {
+	for( n=primeiro_no(u->vizinhos_sai); n->conteudo; n=proximo_no(n) ) {
 		a = conteudo(n);
 		if( a->destino == v )
 			return a->peso;
@@ -1120,10 +1085,10 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 	vertices vs;
 
 	if( algoritmo == 'd' ) {
-		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
+		for( n=primeiro_no(g->vertices); n->conteudo; n=proximo_no(n) ) {
 			u = conteudo(n);
 			dijkstra(u, g);
-			for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
+			for( n2=primeiro_no(g->vertices); n2->conteudo; n2=proximo_no(n2) ) {
 				v = conteudo(n2);
 				if( u == v ) {
 					c[u->id][v->id] = constroi_lista();
@@ -1150,8 +1115,6 @@ lista **caminhos_minimos(lista **c, grafo g, char algoritmo) {
 		}
 
 		floydwarshall(d, m, g);
-		print_mat_dist(d, g->nvertices);
-		print_mat_v(m, g);
 		for( i=0; i < g->nvertices; ++i ) {
 			for( j=0; j < g->nvertices; ++j ) {
 				c[i][j] = constroi_lista();
@@ -1197,10 +1160,10 @@ long int **distancias(long int **d, grafo g, char algoritmo) {
 	vertice u, v;
 
 	if( algoritmo == 'd' ) {
-		for( n=primeiro_no(g->vertices); n; n=proximo_no(n) ) {
+		for( n=primeiro_no(g->vertices); n->conteudo; n=proximo_no(n) ) {
 			u = conteudo(n);
 			dijkstra(u, g);
-			for( n2=primeiro_no(g->vertices); n2; n2=proximo_no(n2) ) {
+			for( n2=primeiro_no(g->vertices); n2->conteudo; n2=proximo_no(n2) ) {
 				v = conteudo(n2);
 				if( u == v )
 					d[u->id][v->id] = 0;

@@ -22,12 +22,17 @@ typedef enum __Estado {
 	Visitado
 }Estado;
 
+struct no {
+  void*	conteudo;
+  no	anterior;
+  no 	proximo;
+};
+
 typedef struct lista *lista;
 struct lista {
-
   unsigned int tamanho;
-  int padding; // só pra evitar warning
   no primeiro;
+  no sentinela;
 };
 
 typedef struct grafo *grafo;
@@ -62,6 +67,8 @@ struct aresta {
 };
 
 no primeiro_no(lista l);
+no ultimo_no(lista l);
+
 no proximo_no(no n);
 void *conteudo(no n);
 
@@ -73,6 +80,8 @@ void *conteudo(no n);
 void print_a(vertice, lista);
 void print_v(grafo g);
 void print_attr(vertice v, lista l);
+no anterior_no(no);
+
 
 /*____________________________________________________________________________*/
 void print_v(grafo g) {
@@ -81,7 +90,7 @@ void print_v(grafo g) {
 	lista l = g->vertices;
 
 	printf("Grafo %s=%p\n", g->nome, g);
-	for( n=primeiro_no(l); n; n=proximo_no(n) ) {
+	for( n=primeiro_no(l); n->conteudo; n=proximo_no(n) ) {
 			v = conteudo(n);
 			printf("%u %s=%p\n", v->id, v->nome, v);
 			printf("\tV.:\n");
@@ -94,7 +103,7 @@ void print_vbylista(lista l) {
 	no n;
 	vertice v;
 
-	for( n=primeiro_no(l); n; n=proximo_no(n) ) {
+	for( n=primeiro_no(l); n->conteudo; n=proximo_no(n) ) {
 		v = conteudo(n);
         fprintf(stderr, "(%s, %s), Estado=%s, Distancia=%ld, possui %u aresta(s).\n",\
         		v->anterior ? v->anterior->nome : "NULL",\
@@ -116,7 +125,7 @@ void print_a(vertice v, lista l) {
         a = conteudo(n);
         fprintf(stderr, "\taresta=%p\n", a);
         fprintf(stderr, "\t(%s=%p, %s=%p)\n", v->nome, v, a->destino->nome, a->destino);
-        for( n=proximo_no(n); n; n=proximo_no(n) ) {
+        for( n=proximo_no(n); n->conteudo; n=proximo_no(n) ) {
             a = conteudo(n);
             fprintf(stderr, "\taresta=%p\n", a);
             fprintf(stderr, "\t(%s=%p, %s=%p)\n", v->nome, v, a->destino->nome, a->destino);
@@ -135,7 +144,7 @@ void print_attr(vertice v, lista l) {
 				a->origem->nome,\
 				a->destino->nome,\
 				a->peso);
-        for( n=proximo_no(n); n; n=proximo_no(n) ) {
+        for( n=proximo_no(n); n->conteudo; n=proximo_no(n) ) {
             a = conteudo(n);
             fprintf(stderr, "\t(%s, %s) Peso=%ld\n",\
 					a->origem->nome,\
@@ -152,7 +161,7 @@ void print_vattr(grafo g) {
 	lista l = g->vertices;
 
 	printf("Grafo %s=%p\n", g->nome, g);
-	for( n=primeiro_no(l); n; n=proximo_no(n) ) {
+	for( n=primeiro_no(l); n->conteudo; n=proximo_no(n) ) {
 		v = conteudo(n);
         fprintf(stderr, "%s, Estado=%s, Distancia=%ld, possui %u aresta(s).\n",\
         		v->nome,\
@@ -179,7 +188,7 @@ const char *busca_nome(unsigned int id, grafo g) {
 	const char *p = NULL;
 	vertice u;
 
-	for( no n=primeiro_no(g->vertices); n && !p; n=proximo_no(n) ) {
+	for( no n=primeiro_no(g->vertices); n->conteudo && !p; n=proximo_no(n) ) {
 		u = conteudo(n);
 		if( u->id == id )
 			p = u->nome;
@@ -201,14 +210,40 @@ void print_mat(lista **m, grafo g) {
 
 			l = m[i][j];
 			n = primeiro_no(l);
-			if( n ) {
+			if( n->conteudo ) {
 				u = conteudo(n);
 				fprintf(stderr, "\t%s", u->nome);
-				for( n=proximo_no(n); n; n=proximo_no(n) ) {
+				for( n=proximo_no(n); n->conteudo; n=proximo_no(n) ) {
 					u = conteudo(n);
 					fprintf(stderr, "->%s", u->nome);
 				}
-				fprintf(stderr, " distancia = %ld\n", u->distancia);
+//				fprintf(stderr, " distancia = %ld\n", u->distancia);
+			}
+		}
+	}
+}
+
+void print_mat_rev(lista **m, grafo g) {
+	lista l;
+	no n;
+	vertice u;
+	unsigned int i, j;
+
+	for( i=0; i < g->nvertices; i++ ) {
+		for( j=0; j < g->nvertices; j++ ) {
+			fprintf(stderr, "(%u %u, %s %s)\n", i, j,\
+					busca_nome(i, g), busca_nome(j, g));
+
+			l = m[i][j];
+			n = ultimo_no(l);
+			if( n && n->conteudo ) {
+				u = conteudo(n);
+				fprintf(stderr, "\t%s", u->nome);
+				for( n=anterior_no(n); n->conteudo; n=anterior_no(n) ) {
+					u = conteudo(n);
+					fprintf(stderr, "->%s", u->nome);
+				}
+//				fprintf(stderr, " distancia = %ld\n", u->distancia);
 			}
 		}
 	}
