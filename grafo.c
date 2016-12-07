@@ -1057,11 +1057,22 @@ lista caminho_minimo(vertice u, vertice v, grafo g) {
 	// Constroi lista com o menor caminho, percorrendo do objetivo
 	// v target.
 	T = constroi_lista();
-	insere_lista(v, T);
+
+	// Faltou no primeiro trabalho; verificar se u e v estão em componentes
+	// diferentes.
 	vertice p = v->anterior;
+	vertice utmp;
 	while( p ) {
-		insere_lista(p, T);
+		utmp = p;
 		p = p->anterior;
+	}
+	if( utmp == u ) {
+		insere_lista(v, T);
+		p = v->anterior;
+		while( p ) {
+			insere_lista(p, T);
+			p = p->anterior;
+		}
 	}
 
 	return T;

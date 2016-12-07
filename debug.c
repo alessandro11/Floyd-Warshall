@@ -217,6 +217,7 @@ void print_mat(lista **m, grafo g) {
 					u = conteudo(n);
 					fprintf(stderr, "->%s", u->nome);
 				}
+				fprintf(stderr, "\n");
 //				fprintf(stderr, " distancia = %ld\n", u->distancia);
 			}
 		}
@@ -243,6 +244,7 @@ void print_mat_rev(lista **m, grafo g) {
 					u = conteudo(n);
 					fprintf(stderr, "->%s", u->nome);
 				}
+				fprintf(stderr, "\n");
 //				fprintf(stderr, " distancia = %ld\n", u->distancia);
 			}
 		}

@@ -74,26 +74,18 @@ int main(int argc, char* argv[]) {
 
   if( !g )
     return 1;
-	uint i, j;
 
-	lint **dist = (lint**)calloc(g->nvertices, sizeof(lint**));
-	for( i=0; i < g->nvertices; i++ ) {
-		dist[i] = (lint*)calloc(g->nvertices, sizeof(lint*));
-	}
+	vertice u;
+	vertice v;
+	lista T;
 
-	distancias(dist, g, 'd');
-	print_mat_dist(dist, g->nvertices);
-	puts("\n");
-	distancias(dist, g, ' ');
-	print_mat_dist(dist, g->nvertices);
+  	u = busca_vertice("A", g->vertices);
+  	v = busca_vertice("G", g->vertices);
+  	fprintf(stderr, "%ld\n", distancia(u, v, g));
 
-	for( i=0; i < g->nvertices; i++ ) {
-		free(dist[i]);
-	}
-	free(dist);
-
-	fprintf(stderr, "%d\n", direcionado(g));
-	fprintf(stderr, "%ld\n", diametro(g));
+  	T = caminho_minimo(u, v, g);
+  	print_vbylista(T);
+  	destroi_lista(T, NULL);
 
   printf("nome: %s\n", nome_grafo(g));
   printf("%sdirecionado\n", direcionado(g) ? "" : "não ");
